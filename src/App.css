@@ -1,8 +1,21 @@
 .App {
-  text-align: center;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+}
+
+.menu {
+  flex-grow: 1;
+  flex-basis: 200px;
+  flex-shrink: 1;
+  background-color: pink;
+}
+
+.content {
+  flex: 8;
+  background-color: skyblue;
+  display: flex;
   justify-content: center;
+  align-items: center;
 }
