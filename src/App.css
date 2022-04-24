@@ -7,15 +7,32 @@
 
 .menu {
   flex-grow: 1;
-  flex-basis: 200px;
+  flex-basis: 60px;
   flex-shrink: 1;
-  background-color: pink;
+  border-right: 1px solid #d5d5d5;
+  overflow: auto;
+}
+
+.menu > h1 {
+  padding: 10px 20px;
+  font-size: 30px;
+}
+
+.menu > a {
+  padding: 10px 20px;
+  font-size: 26px;
+  text-decoration: none;
+  display: block;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.menu > a:hover {
+  color: #fff;
+  background-color: #405093;
 }
 
 .content {
   flex: 8;
-  background-color: skyblue;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  overflow-x: hidden;
 }
