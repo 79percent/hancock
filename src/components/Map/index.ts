@@ -38,7 +38,7 @@ export default class EnergyRing {
     this.scene = new Scene();
     this.camera = new PerspectiveCamera(1, aspect, 0.1, 200);
     this.camera.lookAt(0, 0, 0);
-    this.camera.position.set(0.5, -8, 5);
+    this.camera.position.set(0, 0, 1000);
     this.renderer = new WebGLRenderer({
       antialias: true, // 抗锯齿
       alpha: true,
@@ -47,7 +47,7 @@ export default class EnergyRing {
     this.ele.appendChild(this.renderer.domElement);
     this.light = new DirectionalLight(0xffffff, 1);
     // this.light = new AmbientLight(100);
-    this.light.position.set(-10, -10, -20);
+    this.light.position.set(0, 0, 1000);
     this.scene.add(this.light);
     this.grids = [];
     this.createShape();
@@ -73,19 +73,26 @@ export default class EnergyRing {
     const points = hangzhou.features[0].geometry.coordinates[0][0];
     console.log(points);
     const [centerX, centerY] = hangzhou.features[0].properties.center;
-    this.camera.lookAt(centerX, centerY, 0);
-    this.camera.position.set(120.293461, 30.315084, 2);
+    this.camera.lookAt((centerX - 120) * 100, (centerY - 30) * 100, 0);
+    this.camera.position.set(0, 0, 1000);
     const shape = new Shape();
+    let _x0: number, _y0: number;
     points.forEach(([x, y], index) => {
+      const _x = (x - 120) * 100;
+      const _y = (y - 30) * 100;
       if (index === 0) {
-        shape.moveTo(x, y);
+        _x0 = _x;
+        _y0 = _y;
+        shape.moveTo(_x, _y);
       } else {
-        shape.lineTo(x, y);
+        shape.lineTo(_x, _y);
+      }
+      if (index === points.length - 1) {
+        shape.lineTo(_x0, _y0);
       }
     });
-    shape.lineTo(points[0][0], points[0][1]);
     const extrudeSettings = {
-      depth: 0.1,
+      depth: 1,
       // bevelEnabled: true,
       // bevelSegments: 2,
       // steps: 2,
