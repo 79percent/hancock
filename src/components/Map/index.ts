@@ -11,6 +11,10 @@ import {
   DirectionalLight,
   MeshPhongMaterial,
   AmbientLight,
+  LineBasicMaterial,
+  Vector3,
+  BufferGeometry,
+  Line,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import hangzhou from "./hangzhou.json";
@@ -36,9 +40,9 @@ export default class EnergyRing {
     this.ele = ele;
     const aspect = this.ele.clientWidth / this.ele.clientHeight;
     this.scene = new Scene();
-    this.camera = new PerspectiveCamera(1, aspect, 0.1, 200);
+    this.camera = new PerspectiveCamera(10, aspect, 1, 10000000);
     this.camera.lookAt(0, 0, 0);
-    this.camera.position.set(0, 0, 1000);
+    this.camera.position.set(0, 0, 100);
     this.renderer = new WebGLRenderer({
       antialias: true, // 抗锯齿
       alpha: true,
@@ -47,9 +51,11 @@ export default class EnergyRing {
     this.ele.appendChild(this.renderer.domElement);
     this.light = new DirectionalLight(0xffffff, 1);
     // this.light = new AmbientLight(100);
-    this.light.position.set(0, 0, 1000);
+    this.light.position.set(0, -80, 100);
     this.scene.add(this.light);
     this.grids = [];
+    this.createLine();
+    // this.createSq();
     this.createShape();
     this.value = -1;
 
@@ -61,25 +67,95 @@ export default class EnergyRing {
     this.render();
   }
 
-  /** 绘制自定义形状 */
-  public createShape = () => {
-    console.log(hangzhou);
-    // const points = [
-    //   [-2, -2],
-    //   [-2, 2],
-    //   [2, 2],
-    //   [2, -2],
-    // ];
-    const points = hangzhou.features[0].geometry.coordinates[0][0];
-    console.log(points);
-    const [centerX, centerY] = hangzhou.features[0].properties.center;
-    this.camera.lookAt((centerX - 120) * 100, (centerY - 30) * 100, 0);
-    this.camera.position.set(0, 0, 1000);
+  /** 绘制轴线 */
+  public createLine = () => {
+    const lineMaterial = new LineBasicMaterial({ color: "red" }); // y
+    const lineMaterial2 = new LineBasicMaterial({ color: "blue" }); // x
+    const lineMaterial3 = new LineBasicMaterial({ color: "yellow" }); // z
+
+    const geometry = new BufferGeometry().setFromPoints([
+      new Vector3(0, 0, 0),
+      new Vector3(0, 100, 0),
+    ]);
+
+    const line = new Line(geometry, lineMaterial);
+    this.scene.add(line);
+
+    const geometry2 = new BufferGeometry().setFromPoints([
+      new Vector3(0, 0, 0),
+      new Vector3(100, 0, 0),
+    ]);
+    const line2 = new Line(geometry2, lineMaterial2);
+    this.scene.add(line2);
+
+    const geometry3 = new BufferGeometry().setFromPoints([
+      new Vector3(0, 0, 0),
+      new Vector3(0, 0, 100),
+    ]);
+    const line3 = new Line(geometry3, lineMaterial3);
+    this.scene.add(line3);
+  };
+
+  /** 绘制正方形 */
+  public createSq = () => {
+    const center = [180, 180];
+    const points = [
+      [120, 120],
+      [240, 120],
+      [240, 240],
+      [120, 240],
+    ];
+    this.camera.lookAt(center[0], center[1], 0);
+    this.camera.position.set(center[0], center[1], 500);
     const shape = new Shape();
     let _x0: number, _y0: number;
     points.forEach(([x, y], index) => {
-      const _x = (x - 120) * 100;
-      const _y = (y - 30) * 100;
+      const _x = x - center[0];
+      const _y = y - center[0];
+      if (index === 0) {
+        _x0 = _x;
+        _y0 = _y;
+        shape.moveTo(_x, _y);
+      } else {
+        shape.lineTo(_x, _y);
+      }
+      if (index === points.length - 1) {
+        shape.lineTo(_x0, _y0);
+      }
+    });
+    const extrudeSettings = {
+      depth: 10,
+      bevelSize: 0,
+    };
+    const geometry = new ExtrudeGeometry(shape, extrudeSettings);
+    const material = new MeshBasicMaterial({
+      color: "#549CB7",
+      side: DoubleSide,
+    });
+    const mesh = new Mesh(geometry, material);
+    mesh.position.set(0, 0, 0);
+    this.scene.add(mesh);
+    return {
+      geometry,
+      material,
+      mesh,
+    };
+  };
+
+  /** 绘制地图形状 */
+  public createShape = () => {
+    const p = 100;
+    const points = hangzhou.features[0].geometry.coordinates[0][0];
+    const center = hangzhou.features[0].properties.center.map(
+      (item) => item * p
+    );
+    this.camera.lookAt(center[0], center[1], 0);
+    this.camera.position.set(0, -120, 100);
+    const shape = new Shape();
+    let _x0: number, _y0: number;
+    points.forEach(([x, y], index) => {
+      const _x = x * p - center[0];
+      const _y = y * p - center[1];
       if (index === 0) {
         _x0 = _x;
         _y0 = _y;
@@ -93,21 +169,13 @@ export default class EnergyRing {
     });
     const extrudeSettings = {
       depth: 1,
-      // bevelEnabled: true,
-      // bevelSegments: 2,
-      // steps: 2,
       bevelSize: 0,
-      // bevelThickness: 1,
     };
     const geometry = new ExtrudeGeometry(shape, extrudeSettings);
-    const material = new MeshBasicMaterial({
+    const material = new MeshPhongMaterial({
       color: "#549CB7",
       side: DoubleSide,
     });
-    // const material = new MeshPhongMaterial({
-    //   color: "#549CB7",
-    //   side: DoubleSide,
-    // });
     const mesh = new Mesh(geometry, material);
     mesh.position.set(0, 0, 0);
     this.scene.add(mesh);
@@ -117,6 +185,9 @@ export default class EnergyRing {
       mesh,
     };
   };
+
+  /** 绘制杭州市地图 */
+  public createMap = () => {};
 
   /** 渲染 */
   public render = () => {
