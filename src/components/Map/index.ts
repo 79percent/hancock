@@ -41,27 +41,27 @@ export default class EnergyRing {
     const aspect = this.ele.clientWidth / this.ele.clientHeight;
     this.scene = new Scene();
     this.camera = new PerspectiveCamera(10, aspect, 1, 10000000);
-    this.camera.lookAt(0, 0, 0);
-    this.camera.position.set(0, 0, 100);
     this.renderer = new WebGLRenderer({
       antialias: true, // 抗锯齿
       alpha: true,
     });
-    this.renderer.setSize(this.ele.clientWidth, this.ele.clientHeight);
-    this.ele.appendChild(this.renderer.domElement);
     this.light = new DirectionalLight(0xffffff, 1);
     // this.light = new AmbientLight(100);
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.grids = [];
+    this.value = -1;
+
+    this.camera.lookAt(0, 0, 0);
+    this.camera.position.set(0, 0, 100);
+    this.renderer.setSize(this.ele.clientWidth, this.ele.clientHeight);
+    this.ele.appendChild(this.renderer.domElement);
     this.light.position.set(0, -80, 100);
     this.scene.add(this.light);
-    this.grids = [];
     this.createLine();
     // this.createSq();
     this.createShape();
-    this.value = -1;
 
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     // this.controls.enabled = false;
-
     // this.animate(false);
 
     this.render();
