@@ -7,11 +7,13 @@ import {
   DoubleSide,
   Shape,
   ExtrudeGeometry,
+  CubicBezierCurve,
   ShapeGeometry,
   DirectionalLight,
   MeshPhongMaterial,
   AmbientLight,
   LineBasicMaterial,
+  Vector2,
   Vector3,
   BufferGeometry,
   Line,
@@ -35,6 +37,9 @@ export default class EnergyRing {
   public value: number;
   public light: DirectionalLight;
   // public light: AmbientLight;
+  public centerX: number;
+  public centerY: number;
+  public scale: number;
 
   constructor(ele: HTMLElement) {
     this.ele = ele;
@@ -50,16 +55,48 @@ export default class EnergyRing {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.grids = [];
     this.value = -1;
+    this.scale = 100;
+    this.centerX = 0;
+    this.centerY = 0;
 
-    this.camera.lookAt(0, 0, 0);
-    this.camera.position.set(0, 0, 100);
+    // 计算中心点
+    let max_x = -1,
+      max_y = -1,
+      min_x = Infinity,
+      min_y = Infinity;
+    hangzhou.features.forEach((item) => {
+      const { geometry } = item;
+      const { coordinates } = geometry;
+      coordinates[0][0].forEach((point) => {
+        const [_x, _y] = point;
+        if (_x > max_x) {
+          max_x = _x;
+        }
+        if (_y > max_y) {
+          max_y = _y;
+        }
+        if (_x < min_x) {
+          min_x = _x;
+        }
+        if (_y < min_y) {
+          min_y = _y;
+        }
+      });
+    });
+    this.centerX = ((max_x + min_x) / 2) * this.scale;
+    this.centerY = ((max_y + min_y) / 2) * this.scale;
+
     this.renderer.setSize(this.ele.clientWidth, this.ele.clientHeight);
     this.ele.appendChild(this.renderer.domElement);
+    this.camera.lookAt(0, 0, 0);
+    this.camera.position.set(0, 0, 100);
     this.light.position.set(0, -80, 100);
     this.scene.add(this.light);
+
     this.createLine();
+    this.createMap();
+    // this.createShape();
     // this.createSq();
-    this.createShape();
 
     // this.controls.enabled = false;
     // this.animate(false);
@@ -75,7 +112,7 @@ export default class EnergyRing {
 
     const geometry = new BufferGeometry().setFromPoints([
       new Vector3(0, 0, 0),
-      new Vector3(0, 100, 0),
+      new Vector3(0, 10000, 0),
     ]);
 
     const line = new Line(geometry, lineMaterial);
@@ -83,14 +120,14 @@ export default class EnergyRing {
 
     const geometry2 = new BufferGeometry().setFromPoints([
       new Vector3(0, 0, 0),
-      new Vector3(100, 0, 0),
+      new Vector3(10000, 0, 0),
     ]);
     const line2 = new Line(geometry2, lineMaterial2);
     this.scene.add(line2);
 
     const geometry3 = new BufferGeometry().setFromPoints([
       new Vector3(0, 0, 0),
-      new Vector3(0, 0, 100),
+      new Vector3(0, 0, 10000),
     ]);
     const line3 = new Line(geometry3, lineMaterial3);
     this.scene.add(line3);
@@ -143,37 +180,52 @@ export default class EnergyRing {
   };
 
   /** 绘制地图形状 */
-  public createShape = () => {
-    const p = 100;
-    const points = hangzhou.features[0].geometry.coordinates[0][0];
-    const center = hangzhou.features[0].properties.center.map(
-      (item) => item * p
-    );
-    this.camera.lookAt(center[0], center[1], 0);
-    this.camera.position.set(0, -120, 100);
+  public createShape = (feature: any, color: string) => {
+    const points = feature.geometry.coordinates[0][0];
     const shape = new Shape();
     let _x0: number, _y0: number;
-    points.forEach(([x, y], index) => {
-      const _x = x * p - center[0];
-      const _y = y * p - center[1];
+    // 直接连线
+    // points.forEach(([x, y]: any, index: number) => {
+    //   const _x = x * this.scale - this.centerX;
+    //   const _y = y * this.scale - this.centerY;
+    //   if (index === 0) {
+    //     _x0 = _x;
+    //     _y0 = _y;
+    //     shape.moveTo(_x, _y);
+    //   } else {
+    //     shape.lineTo(_x, _y);
+    //   }
+    //   if (index === points.length - 1) {
+    //     shape.lineTo(_x0, _y0);
+    //   }
+    // });
+    // 平滑处理
+    const vector2Arr: Vector2[] = [];
+    points.forEach(([x, y]: any, index: number) => {
+      const _x = x * this.scale - this.centerX;
+      const _y = y * this.scale - this.centerY;
       if (index === 0) {
         _x0 = _x;
         _y0 = _y;
         shape.moveTo(_x, _y);
+        vector2Arr.push(new Vector2(_x, _y));
       } else {
-        shape.lineTo(_x, _y);
+        vector2Arr.push(new Vector2(_x, _y));
       }
       if (index === points.length - 1) {
-        shape.lineTo(_x0, _y0);
+        vector2Arr.push(new Vector2(_x0, _y0));
       }
     });
+    shape.splineThru(vector2Arr);
+
     const extrudeSettings = {
-      depth: 1,
+      depth: Math.round(Math.random() * 5 + 5),
       bevelSize: 0,
     };
     const geometry = new ExtrudeGeometry(shape, extrudeSettings);
+
     const material = new MeshPhongMaterial({
-      color: "#549CB7",
+      color,
       side: DoubleSide,
     });
     const mesh = new Mesh(geometry, material);
@@ -187,7 +239,30 @@ export default class EnergyRing {
   };
 
   /** 绘制杭州市地图 */
-  public createMap = () => {};
+  public createMap = () => {
+    this.camera.lookAt(this.centerX, this.centerY, 0);
+    // this.camera.position.set(0, -800, 800);
+    this.camera.position.set(0, 0, 800);
+
+    const colorList = [
+      "red",
+      "pink",
+      "skyblue",
+      "#fff",
+      "blue",
+      "yellow",
+      "orange",
+      "#123456",
+      "#98721f",
+      "green",
+    ];
+
+    const { features } = hangzhou;
+    features.forEach((item, index) => {
+      let color = colorList[index % (colorList.length - 1)];
+      this.createShape(item, color);
+    });
+  };
 
   /** 渲染 */
   public render = () => {
