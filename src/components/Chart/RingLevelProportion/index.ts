@@ -47,13 +47,13 @@ class RingChart {
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = 3.5;
+    this.ctx.lineWidth = 3;
     this.ctx.arc(
       this.WIDTH / 2,
       this.HEIGHT / 2,
-      (this.R1 + this.R2) / 2 + 2,
-      -Math.PI * 0.5,
-      Math.PI * 1,
+      (this.R1 + this.R2) / 2 + 3,
+      0,
+      Math.PI * 2,
       false
     );
     this.ctx.stroke();
@@ -91,7 +91,7 @@ class RingChart {
     this.ctx.arc(
       this.WIDTH / 2,
       this.HEIGHT / 2,
-      (this.R1 + this.R2) / 2,
+      (this.R1 + this.R2) / 2 - 1,
       start,
       end
     );
@@ -117,7 +117,7 @@ class RingChart {
 
   /** 动画 */
   private anime = () => {
-    const { id, color, name, value, total } = this.params;
+    const { color, name, value, total } = this.params;
     if (this.currentValue >= value) {
       return;
     }
@@ -135,12 +135,12 @@ class RingChart {
 
   /** 初始化 */
   public init = () => {
-    const { id, color, name, value, total } = this.params;
+    const { color, name, value, total } = this.params;
     this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
     this.widthCricle1(color);
     this.widthCricle2(color);
-    this.drawRingByRate(this.currentValue, color, total);
-    this.drawTextByRate(this.currentValue, color, name);
+    this.drawRingByRate(value, color, total);
+    this.drawTextByRate(value, color, name);
   };
 
   /** 更新 */

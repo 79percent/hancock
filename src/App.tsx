@@ -2,8 +2,16 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import Map from "./pages/Map";
+import Bar from "./pages/Bar";
+import Ring from "./pages/Ring";
 
-const router = [
+type RouterItem = {
+  path: string;
+  title: string;
+  component?: JSX.Element;
+};
+
+const router: RouterItem[] = [
   {
     path: "/map",
     title: "map",
@@ -12,10 +20,12 @@ const router = [
   {
     path: "/bar",
     title: "bar",
+    component: <Bar />,
   },
   {
     path: "/ring",
     title: "ring",
+    component: <Ring />,
   },
   {
     path: "/list",
@@ -24,6 +34,10 @@ const router = [
   {
     path: "/energy",
     title: "energy",
+  },
+  {
+    path: "/node",
+    title: "node",
   },
 ];
 

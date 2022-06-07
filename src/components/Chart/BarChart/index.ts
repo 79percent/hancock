@@ -1,11 +1,25 @@
 import emptyImg from "./loophole_img_no_data.png";
 import { bind } from "size-sensor";
 import _ from "lodash";
+import { slowMotion } from "../../utils";
 
 const DefaultWidth = 200;
 const DefaultHeight = 200;
 
 interface Options {
+  data: DataType[];
+  padding?: number[];
+  itemStyle?: ItemStyle;
+  thumbStyle?: ThumbStyle;
+  row?: number;
+  column?: number;
+  fontSize?: number;
+  color?: Color;
+  valuePositon?: "top" | "right";
+  [propName: string]: any;
+}
+
+interface ThisOptions {
   data: DataType[];
   padding: number[];
   itemStyle: ItemStyle;
@@ -40,7 +54,7 @@ type ThumbStyle = {
   height: number;
 };
 
-const defaultOptions: Options = {
+const defaultOptions: ThisOptions = {
   data: [],
   valuePositon: "top",
   color: {
@@ -56,7 +70,7 @@ const defaultOptions: Options = {
   thumbStyle: {
     radius: [4, 4, 4, 4],
     width: 12,
-    height: 28,
+    height: 32,
   },
   row: 5,
   column: 2,
@@ -69,18 +83,17 @@ class BarChart {
   private HEIGHT: number;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private options: Options;
+  private options: ThisOptions;
   private scale: number;
   private progress: number;
+  private percent: number;
   private div: HTMLDivElement;
 
-  constructor(ele: HTMLElement, options: Options) {
+  constructor(ele: string, options: Options) {
     this.scale = 2;
     this.progress = 0;
-    this.container =
-      typeof ele === "string"
-        ? (document.getElementById(`${ele}`) as HTMLElement)
-        : ele;
+    this.percent = 0;
+    this.container = document.getElementById(ele) as HTMLElement;
     this.WIDHT = DefaultWidth;
     this.HEIGHT = DefaultHeight;
     this.div = document.createElement("div");
@@ -209,6 +222,7 @@ class BarChart {
     if (this.progress > 1) {
       this.progress = 1;
     }
+    this.percent = slowMotion.easeOutCubic(this.progress);
     const barRectRadius = [
       barRadius[0],
       thumbStyle === null ? barRadius[1] : 0,
@@ -245,9 +259,9 @@ class BarChart {
         const startY = itemStartY + itemPadding[0];
         const barStartX = startX;
         const barStartY = startY + itemContentHeight / 2 - barHeight / 2;
-        const barWidthPercent = percent * barWidth * this.progress;
+        const barWidthPercent = percent * barWidth * this.percent;
         const thumbStartX =
-          barStartX + (barWidth - thumbWidth) * percent * this.progress;
+          barStartX + (barWidth - thumbWidth) * percent * this.percent;
         const thumbStartY = startY + itemContentHeight / 2 - thumbHeight / 2;
         this.ctx.save();
         // 绘制每个item背景色和内容背景色
