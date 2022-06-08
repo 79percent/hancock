@@ -255,12 +255,15 @@ export default class Map {
     // this.camera.position.set(0, -800, 800);
     this.camera.position.set(0, 0, 800);
 
+    const { features } = hangzhou;
+    features.forEach((item, index) => {
+      let color = randomColor();
+      this.createShape(item, color);
+    });
+
     const loader = new FontLoader();
     loader.load("./undefined_Regular.json", (font) => {
-      const { features } = hangzhou;
       features.forEach((item, index) => {
-        let color = randomColor();
-        this.createShape(item, color);
         const { name, center } = item.properties;
         const nameX = center[0] * this.scale - this.centerX;
         const nameY = center[1] * this.scale - this.centerY;
