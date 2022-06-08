@@ -17,6 +17,9 @@ import {
   Vector3,
   BufferGeometry,
   Line,
+  Color,
+  FontLoader,
+  Font,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import hangzhou from "./hangzhou.json";
@@ -27,7 +30,13 @@ interface GridsItem {
   mesh: Mesh;
 }
 
-export default class EnergyRing {
+function randomColor() {
+  return `rgb(${Math.floor(Math.random() * 255)},${Math.floor(
+    Math.random() * 255
+  )},${Math.floor(Math.random() * 255)})`;
+}
+
+export default class Map {
   public ele: HTMLElement;
   public scene: Scene;
   public camera: PerspectiveCamera;
@@ -99,7 +108,6 @@ export default class EnergyRing {
     // this.createSq();
 
     // this.controls.enabled = false;
-    // this.animate(false);
 
     this.render();
   }
@@ -219,7 +227,8 @@ export default class EnergyRing {
     shape.splineThru(vector2Arr);
 
     const extrudeSettings = {
-      depth: Math.round(Math.random() * 5 + 5),
+      depth: 5,
+      // depth: Math.round(Math.random() * 5 + 5),
       bevelSize: 0,
     };
     const geometry = new ExtrudeGeometry(shape, extrudeSettings);
@@ -227,6 +236,8 @@ export default class EnergyRing {
     const material = new MeshPhongMaterial({
       color,
       side: DoubleSide,
+      // opacity: 0.7,
+      // transparent: true,
     });
     const mesh = new Mesh(geometry, material);
     mesh.position.set(0, 0, 0);
@@ -244,24 +255,42 @@ export default class EnergyRing {
     // this.camera.position.set(0, -800, 800);
     this.camera.position.set(0, 0, 800);
 
-    const colorList = [
-      "red",
-      "pink",
-      "skyblue",
-      "#fff",
-      "blue",
-      "yellow",
-      "orange",
-      "#123456",
-      "#98721f",
-      "green",
-    ];
-
-    const { features } = hangzhou;
-    features.forEach((item, index) => {
-      let color = colorList[index % (colorList.length - 1)];
-      this.createShape(item, color);
+    const loader = new FontLoader();
+    loader.load("./undefined_Regular.json", (font) => {
+      const { features } = hangzhou;
+      features.forEach((item, index) => {
+        let color = randomColor();
+        this.createShape(item, color);
+        const { name, center } = item.properties;
+        const nameX = center[0] * this.scale - this.centerX;
+        const nameY = center[1] * this.scale - this.centerY;
+        this.createText(font, name, nameX, nameY);
+      });
     });
+  };
+
+  /** 绘制文字 */
+  public createText = (font: Font, name: string, x: number, y: number) => {
+    const color = new Color("#fff");
+    const matLite = new MeshBasicMaterial({
+      color: color,
+      // transparent: true,
+      // opacity: 0.4,
+      side: DoubleSide,
+    });
+    const shapes = font.generateShapes(name, 1.5);
+    const geometry = new ShapeGeometry(shapes);
+    geometry.computeBoundingBox();
+    let xMid = 0,
+      yMid = 0;
+    if (geometry && geometry.boundingBox) {
+      xMid = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+      yMid = -0.5 * (geometry.boundingBox.max.y - geometry.boundingBox.min.y);
+    }
+    geometry.translate(x + xMid, y + yMid, 0);
+    const text = new Mesh(geometry, matLite);
+    text.position.z = 11.05;
+    this.scene.add(text);
   };
 
   /** 渲染 */
@@ -270,27 +299,5 @@ export default class EnergyRing {
     window.requestAnimationFrame(this.render);
     this.controls?.update();
     // console.log(this.camera.position);
-  };
-
-  /** 能量条动画 */
-  public animate = (loop: boolean = false) => {
-    if (!loop && this.value > this.grids.length * 0.65) {
-      return;
-    }
-    this.value++;
-    for (let index = 0; index < this.grids.length; index++) {
-      const { geometry, material, mesh } = this.grids[index];
-      if (index < this.value) {
-        material.color.set("#549CB7");
-      } else {
-        material.color.set("#1B3655");
-      }
-    }
-    if (loop && this.value > this.grids.length) {
-      this.value = -1;
-    }
-    setTimeout(() => {
-      window.requestAnimationFrame(() => this.animate(loop));
-    }, 100);
   };
 }

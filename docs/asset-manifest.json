@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "./static/css/main.461266ee.chunk.css",
+    "main.js": "./static/js/main.452e8127.chunk.js",
+    "main.js.map": "./static/js/main.452e8127.chunk.js.map",
+    "runtime-main.js": "./static/js/runtime-main.9e9b2d8d.js",
+    "runtime-main.js.map": "./static/js/runtime-main.9e9b2d8d.js.map",
+    "static/js/2.b3db3b6a.chunk.js": "./static/js/2.b3db3b6a.chunk.js",
+    "static/js/2.b3db3b6a.chunk.js.map": "./static/js/2.b3db3b6a.chunk.js.map",
+    "index.html": "./index.html",
+    "static/css/main.461266ee.chunk.css.map": "./static/css/main.461266ee.chunk.css.map",
+    "static/js/2.b3db3b6a.chunk.js.LICENSE.txt": "./static/js/2.b3db3b6a.chunk.js.LICENSE.txt",
+    "static/media/header_end_nor.74b156e9.png": "./static/media/header_end_nor.74b156e9.png",
+    "static/media/header_end_warning.2b5ab119.png": "./static/media/header_end_warning.2b5ab119.png",
+    "static/media/loophole_img_no_data.1272b5da.png": "./static/media/loophole_img_no_data.1272b5da.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.9e9b2d8d.js",
+    "static/js/2.b3db3b6a.chunk.js",
+    "static/css/main.461266ee.chunk.css",
+    "static/js/main.452e8127.chunk.js"
+  ]
+}

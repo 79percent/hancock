@@ -4,6 +4,9 @@ import { Routes, Route, Link, useLocation } from "react-router-dom";
 import Map from "./pages/Map";
 import Bar from "./pages/Bar";
 import Ring from "./pages/Ring";
+import List from "./pages/List";
+import Energy from "./pages/Energy";
+import Node from "./pages/Node";
 
 type RouterItem = {
   path: string;
@@ -30,14 +33,17 @@ const router: RouterItem[] = [
   {
     path: "/list",
     title: "list",
+    component: <List />,
   },
   {
     path: "/energy",
     title: "energy",
+    component: <Energy />,
   },
   {
     path: "/node",
     title: "node",
+    component: <Node />,
   },
 ];
 

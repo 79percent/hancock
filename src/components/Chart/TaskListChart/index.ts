@@ -1,13 +1,20 @@
 import emptyImg from "./loophole_img_no_data.png";
 import { bind } from "size-sensor";
 import _ from "lodash";
-import type { Options, Point, AreaInfo, ItemDataType } from "./types";
+import type {
+  Options,
+  Point,
+  AreaInfo,
+  ItemDataType,
+  ThisOptions,
+} from "./types";
 import {
   DefaultWidth,
   DefaultHeight,
   DefaultArea,
   defaultOptions,
 } from "./utils";
+import { slowMotion } from "../../utils";
 
 class BarChart {
   private container: HTMLElement;
@@ -15,7 +22,7 @@ class BarChart {
   private HEIGHT: number;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private options: Options;
+  private options: ThisOptions;
   private scale: number;
   private progress: number;
   private selectIndex: number;
@@ -383,6 +390,7 @@ class BarChart {
     if (this.progress > 1) {
       this.progress = 1;
     }
+    const percent = slowMotion.easeOutCubic(this.progress);
     const {
       data,
       padding,
@@ -548,7 +556,7 @@ class BarChart {
       item.forEach((item2, index2) => {
         this.ctx.save();
         const singleSplitW = geometryItemW / 2.5;
-        const splitW = singleSplitW * index2 * this.progress;
+        const splitW = singleSplitW * index2 * percent;
         let geometryItemX = geometryItemAreaX + splitW - diffX;
         let w = index2 < item.length - 1 ? singleSplitW : geometryItemW;
         if (this.moveItemAreaIndex === index && this.selectIndex !== -1) {

@@ -1,4 +1,4 @@
-export interface Options {
+export interface ThisOptions {
   xAxis: Axis;
   yAxis: Axis;
   data: ItemDataType[][];
@@ -12,6 +12,20 @@ export interface Options {
   [propName: string]: any;
 }
 
+export interface Options {
+  xAxis?: Axis;
+  yAxis?: Axis;
+  data?: ItemDataType[][];
+  padding?: number[];
+  itemStyle?: ItemStyle;
+  fontSize?: number;
+  backgroundColor?: string;
+  legend?: Legend;
+  scrollBarStyle?: ScrollBarStyle;
+  onScrollEnd?: () => void;
+  [propName: string]: any;
+}
+
 export type ItemDataType = {
   createTime: string;
   startTime: string;
@@ -19,7 +33,7 @@ export type ItemDataType = {
   lastRunTime: string;
   runTime: string;
   name: string;
-  status: 'unfinished' | 'running' | 'completed';
+  status: "unfinished" | "running" | "completed";
   priority: 0 | 1 | 2;
   progress: number;
   avatar: string;
